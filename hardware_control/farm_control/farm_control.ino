@@ -3,10 +3,17 @@
 const char FARM_ID = '1';
 const int TEMPERATURE_PIN = A2; 
 const int WATER_PIN = A1;
+const int FELTIER_PINA = 5;
+const int FELTIER_PINB = 6;
+const int HUMIDIFIER_PIN =4;
+const int PUMP_PIN = 7;
+const int FAN_PINA = 2;
+const int FAN_PINB = 3; 
 const int TEMPERATURE_ERROR = 5;
 const int HUMIDITY_ERROR = 5;
 const int WATER_ERROR = 5;
 const int MAX_LED = 10;
+const int SEND_STATUS_DELAY = 1000;
 
 bool farm_on;
 
@@ -23,63 +30,76 @@ int temperature_flag = 0;
 int humidity_flag = 0;
 int water_flag = 0;
 
+unsigned long before_time = 0;
 
 DHT11 dht11(TEMPERATURE_PIN);
 
 int sendCurrentStatus()
 {
-  Serial.print('S');
-  Serial.print(FARM_ID);
-  if(farm_on == true)
+  unsigned long now = millis();
+  if(now - before_time >= SEND_STATUS_DELAY)
   {
-    Serial.print('Y');
-  }
-  else
-  {
-    Serial.print('N');
-  }
+    before_time = now;
+    Serial.print('S');
+    Serial.print(FARM_ID);
+    if(farm_on == true)
+    {
+      Serial.print('Y');
+    }
+    else
+    {
+      Serial.print('N');
+    }
 
-  char temp_str[30];
-  sprintf(temp_str, "%02d", temperature);
-  Serial.print(temp_str);
+    char temp_str[30];
+    sprintf(temp_str, "%02d", temperature);
+    Serial.print(temp_str);
 
-  if(temperature_flag == 1)
-  {
-    Serial.print('H');
-  }
-  else if(temperature_flag == 0)
-  {
-    Serial.print('F');
-  }
-  else
-  {
-    Serial.print('C');
-  }
+    if(temperature_flag == 1)
+    {
+      Serial.print('H');
+    }
+    else if(temperature_flag == 0)
+    {
+      Serial.print('F');
+    }
+    else
+    {
+      Serial.print('C');
+    }
 
-  sprintf(temp_str, "%02d", humidity);
-  Serial.print(temp_str);
+    sprintf(temp_str, "%02d", humidity);
+    Serial.print(temp_str);
 
-  if(humidity_flag == 1)
-  {
-    Serial.print('Y');
-  }
-  else
-  {
-    Serial.print('N');
-  }
+    if(humidity_flag == 1)
+    {
+      Serial.print('Y');
+    }
+    else
+    {
+      Serial.print('N');
+    }
 
-  sprintf(temp_str, "%02d", water);
-  Serial.print(temp_str);
+    sprintf(temp_str, "%02d", water);
+    Serial.print(temp_str);
 
-  if(water_flag == 1)
-  {
-    Serial.print('Y');
+    if(water_flag == 1)
+    {
+      Serial.print('Y');
+    }
+    else
+    {
+      Serial.print('N');
+    }
+    if (led_on == true)
+    {
+      Serial.println(target_LED);
+    }
+    else
+    {
+      Serial.println('N');
+    }
   }
-  else
-  {
-    Serial.print('N');
-  }
-  Serial.println(target_LED);
 }
 
 int Control(int current, int target, int error, int *flag)
@@ -102,9 +122,14 @@ int Control(int current, int target, int error, int *flag)
 
 void setup() {
     Serial.begin(9600);
+    pinMode(FELTIER_PINA, OUTPUT);
+    pinMode(FELTIER_PINB, OUTPUT);;
+    pinMode(HUMIDIFIER_PIN, OUTPUT);
+    pinMode(PUMP_PIN, OUTPUT);
+    pinMode(FAN_PINA, OUTPUT);
+    pinMode(FAN_PINB, OUTPUT);
     farm_on = true;
     led_on = true;
-    
 }
 
 void loop() {
@@ -139,7 +164,7 @@ void loop() {
       }
       Serial.println('Y');
     }
-    else if (set == 'N')
+    else if (set == 'N' && recv_data.length() == 1)
     {
       farm_on = false;
       Serial.println('Y');
@@ -158,33 +183,65 @@ void loop() {
   int humidity_control = Control(humidity, target_humidity, HUMIDITY_ERROR, &humidity_flag);
   int water_control = Control(water, target_water, WATER_ERROR, &water_flag);
 
-  sendCurrentStatus();
-
-  delay(1000);
-
-  
-
-
-
-
-/*
-  int temp_result = dht11.readTemperatureHumidity(temperature, humidity);   //temperature, humidity에 온습도 측정값 저장, temp_result의 인식 성공 결과 저장
-
-  serialPrint(temp_result);   //시리얼 출력
-}
-
-void serialPrint(int temp_result)
-{
-  if (temp_result == 0)
+  if(farm_on == true)
   {
-      Serial.print(temperature);
-      Serial.print(",");
-      Serial.println(humidity);
+    digitalWrite(FAN_PINA, HIGH);
+    digitalWrite(FAN_PINB, LOW);
+
+    if(temperature_control == 1)
+    {
+      digitalWrite(FELTIER_PINA, HIGH);
+      digitalWrite(FELTIER_PINB, LOW);
+    }
+    else if(temperature_control == -1)
+    {
+      digitalWrite(FELTIER_PINA, LOW);
+      digitalWrite(FELTIER_PINB, HIGH);
+    }
+    else
+    {
+      digitalWrite(FELTIER_PINA, LOW);
+      digitalWrite(FELTIER_PINB, LOW);
+    }
+
+    if(humidity_control == 1)
+    {
+      digitalWrite(HUMIDIFIER_PIN, HIGH);
+    }
+    else
+    {
+      digitalWrite(HUMIDIFIER_PIN, LOW);
+    }
+
+    if(water_control == 1)
+    {
+      digitalWrite(PUMP_PIN, HIGH);
+    }
+    else
+    {
+      digitalWrite(PUMP_PIN, LOW);
+    }
   }
   else
   {
-    Serial.println(DHT11::getErrorString(temp_result));
+    digitalWrite(FAN_PINA, LOW);
+    digitalWrite(FAN_PINB, LOW);
+
+    digitalWrite(FELTIER_PINA, LOW);
+    digitalWrite(FELTIER_PINB, LOW);
+    temperature_flag = 0;
+
+    digitalWrite(HUMIDIFIER_PIN, LOW);
+    humidity_flag = 0;
+
+    digitalWrite(PUMP_PIN, LOW);
+    water_flag = 0;
   }
-  */
+
+
+
+  sendCurrentStatus();
+
+
 }
 
