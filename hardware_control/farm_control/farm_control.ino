@@ -162,16 +162,16 @@ void loop() {
         led_on = true;
         target_LED = recv_data[7]-'0';
       }
-      Serial.println('Y');
+      Serial.println('S');
     }
     else if (set == 'N' && recv_data.length() == 1)
     {
       farm_on = false;
-      Serial.println('Y');
+      Serial.println('S');
     }
     else
     {
-      Serial.println('N');
+      Serial.println('F');
     }
   }
 
