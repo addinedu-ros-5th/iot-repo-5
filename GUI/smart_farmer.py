@@ -16,14 +16,41 @@ class WindowClass(QMainWindow, from_class) :
         # Set Default Columns 
         self.cur,  self.remote = self.getCursor()
         names = self.getColNames()
+        self.totalCol = len(names)
 
         for each in names:
             print(each[0])
             column_cnt = self.tableWidget.columnCount() # count total col <- index. 
             self.tableWidget.insertColumn(column_cnt)
             self.tableWidget.setHorizontalHeaderItem(column_cnt, QTableWidgetItem(each[0]))
+       
+        self.tableWidget.horizontalHeader().setSectionResizeMode(QHeaderView.Stretch)   
 
-        self.tableWidget.horizontalHeader().setSectionResizeMode(QHeaderView.Stretch)
+        # Set Default Columns 
+        self.setDefaultRows()
+        
+       
+
+        # 하나씩 추가로 row 추가 
+        # a = self.tableWidget.rowCount()
+        # self.tableWidget.insertRow(a)
+    
+    def setDefaultRows(self):
+        self.cur.execute('SELECT count(*) from plant;')
+        totalRow = self.cur.fetchall()[0][0]
+        self.tableWidget.setRowCount(totalRow)
+
+        self.cur.execute('SELECT * from plant;')
+        allRows = self.cur.fetchall()
+        
+        for rowCnt in range (totalRow):
+
+            rowTuple = allRows[rowCnt]
+            print(rowTuple) # 4 Debugging. 
+
+            for colCnt in range(self.totalCol):
+                self.tableWidget.setItem(rowCnt, colCnt, QTableWidgetItem(f"{rowTuple[colCnt]}"))
+        
 
     def getCursor(self):
         remote = mysql.connector.connect(
