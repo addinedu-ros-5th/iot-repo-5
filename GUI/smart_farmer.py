@@ -7,6 +7,8 @@ from PyQt5.uic import loadUi
 from PyQt5.QtCore import Qt
 from PyQt5.QtCore import QEvent
 
+import serial
+import time
 
 from_class = uic.loadUiType("smart_farmer.ui")[0]
 
@@ -14,7 +16,8 @@ class DialogClass(QDialog): #?
     def __init__(self,  parent=None): #? parent
         super().__init__(parent) 
         loadUi("dialog.ui", self)
-
+        #---------------------------------------------------------------------
+        #UE
         self.parentWindow = self.parent() #? 어케했노. 
         self.addBtn.clicked.connect(self.addRow) #? 왜여기서만 clicked 확인 가능?
 
@@ -40,10 +43,11 @@ class DialogClass(QDialog): #?
                 VALUES ('{userInputs[0]}','{userInputs[1]}', '{userInputs[2]}','{userInputs[3]}',
                 '{userInputs[4]}', '{userInputs[5]}') """ )
         remote.commit()
+
         # print(f"""INSERT INTO plant  ({colNames[0][0]},{colNames[1][0]}, {colNames[2][0]}, {colNames[3][0]}, 
         #         {colNames[4][0]}, {colNames[5][0]}) 
         #         VALUES ('{userInputs[0]}','{userInputs[1]}', '{userInputs[2]}','{userInputs[3]}',
-        #         '{userInputs[4]}', '{userInputs[5]}') """ )
+        #         '{userInputs[4]}', '{userInputs[5]}') """ ) <- DEBUGGING
         
         
 class WindowClass(QMainWindow, from_class) :
@@ -55,6 +59,8 @@ class WindowClass(QMainWindow, from_class) :
 
         self.cur,  self.remote = self.getCursor()
         self.clicekd_name = ""
+        
+        self.connector = self.connect() 
         #---------------------------------------------------------------------
         # Set Default Columns 
         
@@ -74,18 +80,48 @@ class WindowClass(QMainWindow, from_class) :
         #-------------------------------------------------------------------------------------------- 
         #Set Default Rows 
         self.setDefaultRows()
-
-
-        #-------------------------------------------------------------------------------------------- 
         self.tableWidget.setSelectionBehavior(QAbstractItemView.SelectRows) #?
-        self.tableWidget.setSelectionMode(QAbstractItemView.SingleSelection) #? 
-
-
+        self.tableWidget.setSelectionMode(QAbstractItemView.SingleSelection) #?
+        #-------------------------------------------------------------------------------------------- 
         # User Event
         self.tableWidget.cellClicked.connect(self.cellClicked)
         self.deleteBtn.clicked.connect(self.deletRow)
         self.addBtn.clicked.connect(self.addRow)
-    
+        self.applyBtn.clicked.connect(self.testSerial)
+
+    def testSerial(self):
+        request = ""
+        selected_items = self.tableWidget.selectedItems()
+
+        for each in range (1, len(selected_items)):
+            request += selected_items[each].text()
+            request += ","
+        print(request)
+        
+        self.connector.write(request.encode())#?
+
+        time.sleep(0.1)
+
+        if (self.connector.readable()): #?
+            response =  self.connector.readline().decode().strip('\r\n') #?
+            if (len(response) > 0):
+                print("Response: " + str(response))
+
+        
+
+    # def testSerial(self):
+    #     while True:
+    #         data = input("input : ")
+    #         connect.write(data.encode())#?
+
+    #         time.sleep(0.1)
+
+    #         if (connect.readable()): #?
+    #             recv = connect.readline().decode().strip('\r\n') #?
+    #             if (len(recv) > 0):
+    #                 print(" recv: " + str(recv))
+        return        
+
     def addRow(self):
         self.dialog = DialogClass(self) #?
         #dialog.setWindowModality(Qt.ApplicationModal)
@@ -175,10 +211,14 @@ class WindowClass(QMainWindow, from_class) :
         retVal = QMessageBox.question(self, 'Warning Before Deletion', '해당 행을 삭제 하시겠습니까?', 
                                       QMessageBox.Yes | QMessageBox.No , QMessageBox.No)
         return retVal
+
+    def connect(self): #?
+        conn = serial.Serial(port = "/dev/ttyACM0", baudrate=9600, timeout=1)
+        return conn
   
 if __name__ == "__main__":
     app = QApplication(sys.argv)
     myWindows = WindowClass()
     myWindows.show()
     sys.exit(app.exec_())
-    #myWindows.endConnection()
+    myWindows.endConnection() #?
