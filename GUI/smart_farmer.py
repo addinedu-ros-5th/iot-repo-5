@@ -87,16 +87,18 @@ class WindowClass(QMainWindow, from_class) :
         self.tableWidget.cellClicked.connect(self.cellClicked)
         self.deleteBtn.clicked.connect(self.deletRow)
         self.addBtn.clicked.connect(self.addRow)
-        self.applyBtn.clicked.connect(self.testSerial)
+        self.applyBtn.clicked.connect(self.setRequest)
 
-    def testSerial(self):
-        request = ""
+    def temp(self):
+        selected_items = self.tableWidget.selectedItems()
+        print(selected_items[2].text(), selected_items[3].text(), selected_items[6].text(), selected_items[4].text())
+
+    def setRequest(self):
+        request = "Y"
         selected_items = self.tableWidget.selectedItems()
 
-        for each in range (1, len(selected_items)):
-            request += selected_items[each].text()
-            request += ","
-        print(request)
+        request = request + selected_items[2].text() + selected_items[3].text() + selected_items[6].text() + selected_items[4].text()
+        print("Request : " + request)
         
         self.connector.write(request.encode())#?
 
@@ -106,21 +108,7 @@ class WindowClass(QMainWindow, from_class) :
             response =  self.connector.readline().decode().strip('\r\n') #?
             if (len(response) > 0):
                 print("Response: " + str(response))
-
-        
-
-    # def testSerial(self):
-    #     while True:
-    #         data = input("input : ")
-    #         connect.write(data.encode())#?
-
-    #         time.sleep(0.1)
-
-    #         if (connect.readable()): #?
-    #             recv = connect.readline().decode().strip('\r\n') #?
-    #             if (len(recv) > 0):
-    #                 print(" recv: " + str(recv))
-        return        
+                
 
     def addRow(self):
         self.dialog = DialogClass(self) #?
