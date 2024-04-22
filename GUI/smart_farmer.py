@@ -6,11 +6,44 @@ from PyQt5 import uic
 from PyQt5.uic import loadUi
 from PyQt5.QtCore import Qt
 from PyQt5.QtCore import QEvent
+from PyQt5.QtCore import QThread, pyqtSignal
 
 import serial
 import time
 
+import serial
+import struct
+
 from_class = uic.loadUiType("smart_farmer.ui")[0]
+
+class Receiver(QThread):
+    detected = pyqtSignal(str)
+
+    def __init__(self,connector,parent=None): #?
+        super(Receiver, self).__init__(parent) #?
+
+        self.is_running = False
+        self.connector = connector
+
+    def run(self):
+        print("receiving response")
+        self.is_running = True
+        while(self.is_running == True):
+            if self.connector.readable():
+                response = self.connector.read_until('\n').decode().strip('\r\n') #?
+                if (len(response) > 0):
+                    print(response)
+                    self.detected.emit(response)
+                    #self.parentWindow.tempNow.setText(response[3:5])
+
+
+    
+    def stop(self):
+        print("receiving stop")
+        self.is_running = False 
+
+
+
 
 class DialogClass(QDialog): #?
     def __init__(self,  parent=None): #? parent
@@ -18,9 +51,7 @@ class DialogClass(QDialog): #?
         loadUi("dialog.ui", self)
         #---------------------------------------------------------------------
         #UE
-        self.parentWindow = self.parent(
-            
-        ) #?  
+        self.parentWindow = self.parent() #?  
         self.addBtn.clicked.connect(self.addRow) #? 왜여기서만 clicked 확인 가능?
 
 
@@ -56,10 +87,18 @@ class WindowClass(QMainWindow, from_class) :
 
         self.setWindowTitle("Smart Farmer")
 
-        self.cur,  self.remote = self.getCursor()
+        self.cur,  self.remote = self.getCursor() #DB
         self.clicked_name = ""
-        
-        self.connector = self.connect() 
+        self.connector = self.connect() #Arduino
+
+        # for monitoring
+        self.currentVal = ""
+        self.goalVal = ""
+        self.onWorking = False 
+
+        self.receiver = Receiver(self.connector)
+        self.receiver.detected.connect(self.setTemp)
+        self.receiver.start()
         #---------------------------------------------------------------------
         # Set Default Columns 
         
@@ -84,6 +123,13 @@ class WindowClass(QMainWindow, from_class) :
         self.deleteBtn.clicked.connect(self.deletRow)
         self.addBtn.clicked.connect(self.addRow)
         self.applyBtn.clicked.connect(self.setRequest)
+        
+    
+    def setTemp(self, response):  #?
+        self.tempNow.setText(response[3:5])
+        self.humNow.setText(response[6:8])
+        self.moistNow.setText(response[9:11])
+        #self.redRate.setText(response[12])
 
     def temp(self):
         selected_items = self.tableWidget.selectedItems()
@@ -100,10 +146,10 @@ class WindowClass(QMainWindow, from_class) :
 
         time.sleep(0.1)
 
-        if (self.connector.readable()): #?
-            response =  self.connector.readline().decode().strip('\r\n') #?
-            if (len(response) > 0):
-                print("Response: " + str(response))
+        # if (self.connector.readable()): #?
+        #     response =  self.connector.readline().decode().strip('\r\n') #?
+        #     if (len(response) > 0):
+        #         print("Response: " + str(response))
                 
 
     def addRow(self):
