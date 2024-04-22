@@ -15,7 +15,7 @@ const int WATER_ERROR = 5;
 const int MAX_LED = 10;
 const int SEND_STATUS_DELAY = 1000;
 
-bool farm_on;
+bool farm_on = false;
 
 int temperature = 0;
 int humidity = 0;
@@ -128,7 +128,7 @@ void setup() {
     pinMode(PUMP_PIN, OUTPUT);
     pinMode(FAN_PINA, OUTPUT);
     pinMode(FAN_PINB, OUTPUT);
-    farm_on = true;
+    farm_on = false;
     led_on = true;
 }
 
@@ -178,7 +178,7 @@ void loop() {
 
   
   dht11.readTemperatureHumidity(temperature, humidity);
-  water = map(analogRead(WATER_PIN), 1023, 0, 0, 100);
+  water = max(0, min(99, map(analogRead(WATER_PIN), 850, 400, 0, 100)));
   led = map(target_LED, 0, MAX_LED, 0, 255);
   int temperature_control = Control(temperature, target_temperature, TEMPERATURE_ERROR, &temperature_flag);
   int humidity_control = Control(humidity, target_humidity, HUMIDITY_ERROR, &humidity_flag);
