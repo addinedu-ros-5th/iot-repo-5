@@ -4,13 +4,37 @@ from PyQt5.QtWidgets import *
 from PyQt5.QtGui import *
 from PyQt5 import uic
 from PyQt5.uic import loadUi
-from PyQt5.QtCore import Qt
-from PyQt5.QtCore import QEvent
+from PyQt5.QtCore import *
 
 import serial
 import time
 
 from_class = uic.loadUiType("smart_farmer.ui")[0]
+
+class Receiver(QThread):
+    detected = pyqtSignal(str)
+
+    def __init__(self, conn, parent=None):
+        super(Receiver, self).__init__(parent)
+        self.is_running = False
+        self.conn = conn
+
+    def run(self):
+        print("recv start")
+        self.is_running = True
+        while (self.is_running == True):
+            if self.conn.readable():
+                res = self.conn.read_until(b'\n')
+                if len(res) > 0:
+                    res = res[:-2].decode()
+                    self.detected.emit(res)
+    
+    def stop(self):
+        print("recv stop")
+        self.is_running = False
+                    
+
+
 
 class DialogClass(QDialog): #?
     def __init__(self,  parent=None): #? parent
@@ -58,6 +82,9 @@ class WindowClass(QMainWindow, from_class) :
         self.clicked_name = ""
         
         self.connector = self.connect() 
+        self.recv = Receiver(self.connector)
+        self.recv.start()
+        self.recv.detected.connect(self.detected)
         #---------------------------------------------------------------------
         # Set Default Columns 
         
@@ -192,6 +219,11 @@ class WindowClass(QMainWindow, from_class) :
     def connect(self): #?
         conn = serial.Serial(port = "/dev/ttyACM0", baudrate=9600, timeout=1)
         return conn
+    
+    def detected(self, recv):
+        print(recv)
+
+        return
   
 if __name__ == "__main__":
     app = QApplication(sys.argv)
