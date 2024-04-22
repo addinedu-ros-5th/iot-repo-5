@@ -34,7 +34,6 @@ class Receiver(QThread):
                 if (len(response) > 0):
                     print(response)
                     self.detected.emit(response)
-                    #self.parentWindow.tempNow.setText(response[3:5])
 
 
     
@@ -97,7 +96,7 @@ class WindowClass(QMainWindow, from_class) :
         self.onWorking = False 
 
         self.receiver = Receiver(self.connector)
-        self.receiver.detected.connect(self.setTemp)
+        self.receiver.detected.connect(self.getStatus)
         self.receiver.start()
         #---------------------------------------------------------------------
         # Set Default Columns 
@@ -125,32 +124,39 @@ class WindowClass(QMainWindow, from_class) :
         self.applyBtn.clicked.connect(self.setRequest)
         
     
-    def setTemp(self, response):  #?
-        self.tempNow.setText(response[3:5])
-        self.humNow.setText(response[6:8])
-        self.moistNow.setText(response[9:11])
-        #self.redRate.setText(response[12])
+    def getStatus(self, response):  #?
+        if (response[2] == 'Y'):
+            #Temp
+            self.tempNow.setText("현재 온도 : " + response[3:5])
+            if(response[5] == 'C'): self.tempWork.setText("쿨러 작동중!")
+            elif(response[5] == 'H'): self.tempWork.setText("히터 작동중!")
+            else: self.tempWork.setText("")
+            #Humidity
+            self.humNow.setText("현재 습도 : " + response[6:8])
+            if(response[8] == 'Y'): self.humWork.setText("가습기 작동중!") 
+            else : self.humWork.setText("")
+            #Moisture
+            self.moistNow.setText("현재 수분 : " + response[9:11])
+            if(response[11] == 'Y'): self.moistWork.setText("물 공급중!")
+            else : self.moistWork.setText("")
+            #LED
+            self.redRate.setText(response[12])
+        
 
     def temp(self):
         selected_items = self.tableWidget.selectedItems()
         print(selected_items[2].text(), selected_items[3].text(), selected_items[6].text(), selected_items[4].text())
 
-    def setRequest(self):
-        request = "Y"
-        selected_items = self.tableWidget.selectedItems()
 
+    def setRequest(self):
+        selected_items = self.tableWidget.selectedItems()
+        request = "Y"
         request = request + selected_items[1].text() + selected_items[2].text() + selected_items[5].text() + selected_items[3].text()
-        print("Request : " + request)
-        
         self.connector.write(request.encode())#?
 
-        time.sleep(0.1)
-
-        # if (self.connector.readable()): #?
-        #     response =  self.connector.readline().decode().strip('\r\n') #?
-        #     if (len(response) > 0):
-        #         print("Response: " + str(response))
-                
+        self.tempGoal.setText("목표치 : " + selected_items[1].text())
+        self.humGoal.setText("목표치 : " + selected_items[2].text())
+        self.moistGoal.setText("목표치 : " + selected_items[5].text())
 
     def addRow(self):
         self.dialog = DialogClass(self) #?
