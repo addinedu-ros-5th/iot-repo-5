@@ -149,9 +149,9 @@ void loop() {
     if (set == 'Y' && recv_data.length() == 8)
     {
       farm_on = true;
-      target_temperature = recv_data.substring(1,3).toInt();
-      target_humidity = recv_data.substring(3,5).toInt();
-      target_water = recv_data.substring(5,7).toInt();
+      target_temperature = max(0, min(99, recv_data.substring(1,3).toInt()));
+      target_humidity = max(0, min(99, recv_data.substring(3,5).toInt()));
+      target_water = max(0, min(99,recv_data.substring(5,7).toInt()));
 
       if (recv_data[7] == 'N')
       {
@@ -167,6 +167,7 @@ void loop() {
     else if (set == 'N' && recv_data.length() == 1)
     {
       farm_on = false;
+      led_on = false;
       Serial.println('S');
     }
     else
