@@ -25,20 +25,19 @@ class Receiver(QThread):
         self.connector = connector
 
     def run(self):
-        print("receiving response")
         self.is_running = True
         while(self.is_running == True):
             if self.connector.readable():
                 response = self.connector.read_until('\n').decode().strip('\r\n') #?
                 if (len(response) > 0):
-                    print(response)
+                    #print(response)
                     self.detected.emit(response)
 
     def stop(self):
         print("receiving stop")
         self.is_running = False 
 
-class DialogClass(QDialog): #?
+class DialogClass(QDialog): #?``
     def __init__(self,  parent=None): #? parent
         super().__init__(parent) 
         loadUi("dialog.ui", self)
@@ -86,9 +85,9 @@ class WindowClass(QMainWindow, from_class) :
         self.connector = self.connect() #Arduino
 
         # for monitoring
-        self.currentVal = ""
-        self.goalVal = ""
-        self.onWorking = False 
+        self.bestTemp = ""
+        self.bestHum = ""
+        self.moist = ""
 
         self.receiver = Receiver(self.connector)
         self.receiver.detected.connect(self.getStatus)
@@ -120,23 +119,52 @@ class WindowClass(QMainWindow, from_class) :
         self.applyBtn.clicked.connect(self.setRequest)
         
     
-    def getStatus(self, response):  #?
-        if (response[2] == 'Y'):
-            #Temp
+    def getStatus(self, response):  #?     
+        # *** For some reason Some of the first responses were like S1 (line changed) N00F00N90NO. Thus, index out of range error
+        if (len(response) == 13 and response[2] == 'Y'): 
+            print(response)
             self.tempNow.setText("현재 온도 : " + response[3:5])
+            self.tempGoal.setText("목표치 : " + self.bestTemp)
             if(response[5] == 'C'): self.tempWork.setText("쿨러 작동중!")
             elif(response[5] == 'H'): self.tempWork.setText("히터 작동중!")
             else: self.tempWork.setText("")
             #Humidity
             self.humNow.setText("현재 습도 : " + response[6:8])
+            self.humGoal.setText("목표치 : " + self.bestHum)
             if(response[8] == 'Y'): self.humWork.setText("가습기 작동중!") 
             else : self.humWork.setText("")
             #Moisture
             self.moistNow.setText("현재 수분 : " + response[9:11])
+            self.tempGoal.setText("목표치 : " + self.bestMoist)
             if(response[11] == 'Y'): self.moistWork.setText("물 공급중!")
             else : self.moistWork.setText("")
             #LED
             self.redRate.setText(response[12])
+            self.redLabel.show()
+            self.blueLabel.show()
+            self.redRate.show()
+            self.colonLabel.show()
+            self.blueRate.show()
+        elif(len(response) == 13 and response[2] == 'N'):
+            print(response)
+            self.tempNow.setText("현재 온도 : " + response[3:5])
+            self.tempGoal.setText("온도조절 장치 미작동중")
+            self.tempWork.setText("")
+
+            self.humNow.setText("현재 습도 : " + response[6:8])
+            self.humGoal.setText("습도조절 장치 미작동중")
+            self.humWork.setText("")
+
+            self.moistNow.setText("현재 수분 : " + response[9:11])
+            self.moistGoal.setText("수분공급 장치 미작동중")
+            self.moistWork.setText("")
+
+            self.ledLabel.setText("LED 미작동중")
+            self.redLabel.hide()
+            self.blueLabel.hide()
+            self.redRate.hide()
+            self.colonLabel.hide()
+            self.blueRate.hide()
         
 
     def temp(self):
@@ -148,11 +176,13 @@ class WindowClass(QMainWindow, from_class) :
         selected_items = self.tableWidget.selectedItems()
         request = "Y"
         request = request + selected_items[1].text() + selected_items[2].text() + selected_items[5].text() + selected_items[3].text()
+        print("*******" + request)
         self.connector.write(request.encode())#?
 
-        self.tempGoal.setText("목표치 : " + selected_items[1].text())
-        self.humGoal.setText("목표치 : " + selected_items[2].text())
-        self.moistGoal.setText("목표치 : " + selected_items[5].text())
+        self.bestTemp = selected_items[1].text()
+        self.bestHum = selected_items[2].text()
+        self.bestMoist = selected_items[1].text()
+
 
     def addRow(self):
         self.dialog = DialogClass(self) #?

@@ -210,7 +210,7 @@
       <property name="frameShadow">
        <enum>QFrame::Raised</enum>
       </property>
-      <widget class="QLabel" name="ledNow">
+      <widget class="QLabel" name="ledLabel">
        <property name="geometry">
         <rect>
          <x>40</x>
@@ -223,7 +223,7 @@
         <string>LED</string>
        </property>
       </widget>
-      <widget class="QLabel" name="label_32">
+      <widget class="QLabel" name="redLabel">
        <property name="geometry">
         <rect>
          <x>30</x>
@@ -246,10 +246,10 @@
         </rect>
        </property>
        <property name="text">
-        <string>3</string>
+        <string/>
        </property>
       </widget>
-      <widget class="QLabel" name="label_37">
+      <widget class="QLabel" name="blueLabel">
        <property name="geometry">
         <rect>
          <x>180</x>
@@ -275,7 +275,7 @@
         <string>1</string>
        </property>
       </widget>
-      <widget class="QLabel" name="label_39">
+      <widget class="QLabel" name="colonLabel">
        <property name="geometry">
         <rect>
          <x>120</x>
