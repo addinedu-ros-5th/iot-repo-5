@@ -18,7 +18,7 @@ class DialogClass(QDialog): #?
         loadUi("dialog.ui", self)
         #---------------------------------------------------------------------
         #UE
-        self.parentWindow = self.parent() #? 어케했노. 
+        self.parentWindow = self.parent() #?  
         self.addBtn.clicked.connect(self.addRow) #? 왜여기서만 clicked 확인 가능?
 
 
@@ -31,10 +31,7 @@ class DialogClass(QDialog): #?
         self.parentWindow.tableWidget.insertRow(rowCnt)
 
         for each in range(colCnt):
-            if each == 0:
-                self.parentWindow.tableWidget.setItem(rowCnt, each, QTableWidgetItem("선택"))
-            else:
-                self.parentWindow.tableWidget.setItem(rowCnt, each, QTableWidgetItem(f"{userInputs[each-1]}"))
+            self.parentWindow.tableWidget.setItem(rowCnt, each, QTableWidgetItem(f"{userInputs[each]}"))
         # ------------------------------------------------------------------------------------------------
         colNames = self.parentWindow.names 
         cur, remote = self.parentWindow.getCursor()
@@ -58,19 +55,16 @@ class WindowClass(QMainWindow, from_class) :
         self.setWindowTitle("Smart Farmer")
 
         self.cur,  self.remote = self.getCursor()
-        self.clicekd_name = ""
+        self.clicked_name = ""
         
         self.connector = self.connect() 
         #---------------------------------------------------------------------
         # Set Default Columns 
         
         self.names = self.getColNames()
-        self.totalCol = len(self.names) + 1
+        self.totalCol = len(self.names)
         
-        self.tableWidget.insertColumn(0) #Checkbox column
-        self.tableWidget.setHorizontalHeaderItem(0, QTableWidgetItem(""))
         for each in self.names:
-            print(each[0])
             column_cnt = self.tableWidget.columnCount() # count total col <- index. 
             self.tableWidget.insertColumn(column_cnt)
             self.tableWidget.setHorizontalHeaderItem(column_cnt, QTableWidgetItem(each[0]))
@@ -97,7 +91,7 @@ class WindowClass(QMainWindow, from_class) :
         request = "Y"
         selected_items = self.tableWidget.selectedItems()
 
-        request = request + selected_items[2].text() + selected_items[3].text() + selected_items[6].text() + selected_items[4].text()
+        request = request + selected_items[1].text() + selected_items[2].text() + selected_items[5].text() + selected_items[3].text()
         print("Request : " + request)
         
         self.connector.write(request.encode())#?
@@ -115,29 +109,28 @@ class WindowClass(QMainWindow, from_class) :
         #dialog.setWindowModality(Qt.ApplicationModal)
         self.dialog.exec()
 
+
     def deletRow(self):
         retVal = self.askBeforeDel()
         if (retVal == QMessageBox.No) : return
         else :      
             selected_items = self.tableWidget.selectedItems() #?
             if(selected_items):
-                self.cur.execute(f"DELETE FROM plant WHERE name = '{selected_items[1].text()}';")
+                self.cur.execute(f"DELETE FROM plant WHERE name = '{selected_items[0].text()}';")
                 self.remote.commit()
                 #----------------------------------------------------------------    
                 row_indx = self.tableWidget.row(selected_items[1])
-                print(selected_items[1].text() + " deleted")
+                print(selected_items[0].text() + " deleted")
                 self.tableWidget.removeRow(row_indx)
        
-               
-        
-    
+
     def cellClicked(self, row, col):
         print("Clicked row:", row, "Clicked column:", col)
-        cell_item = self.tableWidget.item(row,1)
+        cell_item = self.tableWidget.item(row,0)
 
-        self.clicekd_name = cell_item.text()
+        self.clicked_name = cell_item.text()
         
-        self.cur.execute(f"SELECT * from plant WHERE name = '{self.clicekd_name}'")
+        self.cur.execute(f"SELECT * from plant WHERE name = '{self.clicked_name}'")
         selected_row = self.cur.fetchall()
         print(selected_row)
         
@@ -155,13 +148,9 @@ class WindowClass(QMainWindow, from_class) :
             print(rowTuple) # 4 Debugging. 
 
             for colCnt in range(self.totalCol): # Again, need to consider the first cell of a row. it's fixed.
-                if colCnt == 0:
-                    cell = QTableWidgetItem("선택")
-                    self.tableWidget.setItem(rowCnt, colCnt, cell)
-                else : 
-                    cell = QTableWidgetItem(f"{rowTuple[colCnt-1]}")
-                    #cell.setFlags(cell.flags() & ~Qt.ItemIsEnabled) 
-                    self.tableWidget.setItem(rowCnt, colCnt, cell) # tuple index - 0 ~ 5 but column indx 1 ~ 6
+                cell = QTableWidgetItem(f"{rowTuple[colCnt]}")
+                #cell.setFlags(cell.flags() & ~Qt.ItemIsEnabled) 
+                self.tableWidget.setItem(rowCnt, colCnt, cell) # tuple index - 0 ~ 5 but column indx 1 ~ 6
 
         
     # item = MyQTableWidgetItemCheckBox()
@@ -172,8 +161,8 @@ class WindowClass(QMainWindow, from_class) :
         remote = mysql.connector.connect(
         host = "smart-farming-database.cb4y0k88ysov.ap-northeast-2.rds.amazonaws.com",
         #port = '3306',
-        user = "admin",
-        password = "Louis66411!",
+        user = "user1",
+        password = "1234",
         database = "smart_farming"
         )   
         cur = remote.cursor(buffered=True)
