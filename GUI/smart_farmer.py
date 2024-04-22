@@ -4,9 +4,8 @@ from PyQt5.QtWidgets import *
 from PyQt5.QtGui import *
 from PyQt5 import uic
 from PyQt5.uic import loadUi
-from PyQt5.QtCore import Qt
-from PyQt5.QtCore import QEvent
-from PyQt5.QtCore import QThread, pyqtSignal
+
+from PyQt5.QtCore import *
 
 import serial
 import time
@@ -35,14 +34,9 @@ class Receiver(QThread):
                     print(response)
                     self.detected.emit(response)
 
-
-    
     def stop(self):
         print("receiving stop")
         self.is_running = False 
-
-
-
 
 class DialogClass(QDialog): #?
     def __init__(self,  parent=None): #? parent
@@ -88,6 +82,7 @@ class WindowClass(QMainWindow, from_class) :
 
         self.cur,  self.remote = self.getCursor() #DB
         self.clicked_name = ""
+        
         self.connector = self.connect() #Arduino
 
         # for monitoring
@@ -98,6 +93,7 @@ class WindowClass(QMainWindow, from_class) :
         self.receiver = Receiver(self.connector)
         self.receiver.detected.connect(self.getStatus)
         self.receiver.start()
+
         #---------------------------------------------------------------------
         # Set Default Columns 
         
@@ -246,6 +242,11 @@ class WindowClass(QMainWindow, from_class) :
     def connect(self): #?
         conn = serial.Serial(port = "/dev/ttyACM0", baudrate=9600, timeout=1)
         return conn
+    
+    def detected(self, recv):
+        print(recv)
+
+        return
   
 if __name__ == "__main__":
     app = QApplication(sys.argv)

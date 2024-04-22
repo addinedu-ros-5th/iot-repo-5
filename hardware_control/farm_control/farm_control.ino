@@ -15,7 +15,7 @@ const int WATER_ERROR = 5;
 const int MAX_LED = 10;
 const int SEND_STATUS_DELAY = 1000;
 
-bool farm_on;
+bool farm_on = false;
 
 int temperature = 0;
 int humidity = 0;
@@ -128,7 +128,7 @@ void setup() {
     pinMode(PUMP_PIN, OUTPUT);
     pinMode(FAN_PINA, OUTPUT);
     pinMode(FAN_PINB, OUTPUT);
-    farm_on = true;
+    farm_on = false;
     led_on = true;
 }
 
@@ -149,9 +149,9 @@ void loop() {
     if (set == 'Y' && recv_data.length() == 8)
     {
       farm_on = true;
-      target_temperature = recv_data.substring(1,3).toInt();
-      target_humidity = recv_data.substring(3,5).toInt();
-      target_water = recv_data.substring(5,7).toInt();
+      target_temperature = max(0, min(99, recv_data.substring(1,3).toInt()));
+      target_humidity = max(0, min(99, recv_data.substring(3,5).toInt()));
+      target_water = max(0, min(99,recv_data.substring(5,7).toInt()));
 
       if (recv_data[7] == 'N')
       {
@@ -167,6 +167,7 @@ void loop() {
     else if (set == 'N' && recv_data.length() == 1)
     {
       farm_on = false;
+      led_on = false;
       Serial.println('S');
     }
     else
@@ -177,7 +178,7 @@ void loop() {
 
   
   dht11.readTemperatureHumidity(temperature, humidity);
-  water = map(analogRead(WATER_PIN), 1023, 0, 0, 100);
+  water = max(0, min(99, map(analogRead(WATER_PIN), 850, 400, 0, 100)));
   led = map(target_LED, 0, MAX_LED, 0, 255);
   int temperature_control = Control(temperature, target_temperature, TEMPERATURE_ERROR, &temperature_flag);
   int humidity_control = Control(humidity, target_humidity, HUMIDITY_ERROR, &humidity_flag);
