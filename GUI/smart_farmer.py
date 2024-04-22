@@ -18,7 +18,9 @@ class DialogClass(QDialog): #?
         loadUi("dialog.ui", self)
         #---------------------------------------------------------------------
         #UE
-        self.parentWindow = self.parent() #?  
+        self.parentWindow = self.parent(
+            
+        ) #?  
         self.addBtn.clicked.connect(self.addRow) #? 왜여기서만 clicked 확인 가능?
 
 
