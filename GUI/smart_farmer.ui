@@ -345,17 +345,17 @@
      </widget>
     </widget>
    </widget>
-   <widget class="QPushButton" name="pb">
+   <widget class="QPushButton" name="endBtn">
     <property name="geometry">
      <rect>
-      <x>920</x>
+      <x>880</x>
       <y>20</y>
       <width>89</width>
       <height>25</height>
      </rect>
     </property>
     <property name="text">
-     <string>PushButton</string>
+     <string>종료</string>
     </property>
    </widget>
   </widget>

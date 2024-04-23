@@ -93,6 +93,8 @@ class WindowClass(QMainWindow, from_class) :
         self.receiver.detected.connect(self.getStatus)
         self.receiver.start()
 
+        self.endBtn.hide()
+
         #---------------------------------------------------------------------
         # Set Default Columns 
         
@@ -117,11 +119,14 @@ class WindowClass(QMainWindow, from_class) :
         self.deleteBtn.clicked.connect(self.deletRow)
         self.addBtn.clicked.connect(self.addRow)
         self.applyBtn.clicked.connect(self.setRequest)
-        
+        self.endBtn.clicked.connect(self.stopOperation)
+    
+    def stopOperation(self):
+        self.connector.write("N".encode())#?
     
     def getStatus(self, response):  #?     
         # *** For some reason Some of the first responses were like S1 (line changed) N00F00N90NO. Thus, index out of range error
-        if (len(response) == 13 and response[2] == 'Y'): 
+        if (len(response) == 13 and response[2] == 'Y'):  # Operating
             print(response)
             self.tempNow.setText("현재 온도 : " + response[3:5])
             self.tempGoal.setText("목표치 : " + self.bestTemp)
@@ -135,7 +140,7 @@ class WindowClass(QMainWindow, from_class) :
             else : self.humWork.setText("")
             #Moisture
             self.moistNow.setText("현재 수분 : " + response[9:11])
-            self.tempGoal.setText("목표치 : " + self.bestMoist)
+            self.moistGoal.setText("목표치 : " + self.bestMoist)
             if(response[11] == 'Y'): self.moistWork.setText("물 공급중!")
             else : self.moistWork.setText("")
             #LED
@@ -145,7 +150,10 @@ class WindowClass(QMainWindow, from_class) :
             self.redRate.show()
             self.colonLabel.show()
             self.blueRate.show()
-        elif(len(response) == 13 and response[2] == 'N'):
+
+            #End
+            self.endBtn.show()
+        elif(len(response) == 13 and response[2] == 'N'): # Not Operating 
             print(response)
             self.tempNow.setText("현재 온도 : " + response[3:5])
             self.tempGoal.setText("온도조절 장치 미작동중")
@@ -165,7 +173,8 @@ class WindowClass(QMainWindow, from_class) :
             self.redRate.hide()
             self.colonLabel.hide()
             self.blueRate.hide()
-        
+
+            self.endBtn.hide()
 
     def temp(self):
         selected_items = self.tableWidget.selectedItems()
