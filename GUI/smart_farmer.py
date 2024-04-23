@@ -6,7 +6,6 @@ from PyQt5 import uic
 from PyQt5.uic import loadUi
 
 from PyQt5.QtCore import *
-
 import serial
 import time
 
@@ -133,16 +132,31 @@ class WindowClass(QMainWindow, from_class) :
             if(response[5] == 'C'): self.tempWork.setText("쿨러 작동중!")
             elif(response[5] == 'H'): self.tempWork.setText("히터 작동중!")
             else: self.tempWork.setText("")
+            
+            self.tempWork.setStyleSheet("""
+            QLabel {
+            background-color: red;
+            border: 4px solid black;
+            border-radius: 10px;
+            }
+            """)
+            self.tempWork.show()
+            self.tempWork.setAlignment(Qt.AlignCenter)
+
             #Humidity
             self.humNow.setText("현재 습도 : " + response[6:8])
             self.humGoal.setText("목표치 : " + self.bestHum)
             if(response[8] == 'Y'): self.humWork.setText("가습기 작동중!") 
             else : self.humWork.setText("")
+
+            self.humWork.show()
             #Moisture
             self.moistNow.setText("현재 수분 : " + response[9:11])
             self.moistGoal.setText("목표치 : " + self.bestMoist)
             if(response[11] == 'Y'): self.moistWork.setText("물 공급중!")
             else : self.moistWork.setText("")
+
+            self.moistWork.show()
             #LED
             self.redRate.setText(response[12])
             self.redLabel.show()
@@ -157,15 +171,15 @@ class WindowClass(QMainWindow, from_class) :
             print(response)
             self.tempNow.setText("현재 온도 : " + response[3:5])
             self.tempGoal.setText("온도조절 장치 미작동중")
-            self.tempWork.setText("")
+            self.tempWork.hide()
 
             self.humNow.setText("현재 습도 : " + response[6:8])
             self.humGoal.setText("습도조절 장치 미작동중")
-            self.humWork.setText("")
+            self.humWork.hide()
 
             self.moistNow.setText("현재 수분 : " + response[9:11])
             self.moistGoal.setText("수분공급 장치 미작동중")
-            self.moistWork.setText("")
+            self.moistWork.hide()
 
             self.ledLabel.setText("LED 미작동중")
             self.redLabel.hide()

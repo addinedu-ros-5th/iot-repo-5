@@ -6,8 +6,8 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>1057</width>
-    <height>832</height>
+    <width>1533</width>
+    <height>874</height>
    </rect>
   </property>
   <property name="windowTitle">
@@ -19,9 +19,12 @@
      <rect>
       <x>60</x>
       <y>50</y>
-      <width>911</width>
-      <height>671</height>
+      <width>1411</width>
+      <height>681</height>
      </rect>
+    </property>
+    <property name="styleSheet">
+     <string notr="true">background-color  : white;</string>
     </property>
     <property name="currentIndex">
      <number>0</number>
@@ -30,7 +33,7 @@
      <attribute name="title">
       <string>현재상태</string>
      </attribute>
-     <widget class="QFrame" name="frame">
+     <widget class="QFrame" name="tempFrame">
       <property name="geometry">
        <rect>
         <x>40</x>
@@ -38,6 +41,10 @@
         <width>321</width>
         <height>251</height>
        </rect>
+      </property>
+      <property name="styleSheet">
+       <string notr="true">border: 4px solid black;
+border-radius: 10px;</string>
       </property>
       <property name="frameShape">
        <enum>QFrame::StyledPanel</enum>
@@ -88,7 +95,7 @@
      <widget class="QFrame" name="frame_2">
       <property name="geometry">
        <rect>
-        <x>490</x>
+        <x>460</x>
         <y>50</y>
         <width>321</width>
         <height>251</height>
@@ -198,8 +205,8 @@
      <widget class="QFrame" name="frame_7">
       <property name="geometry">
        <rect>
-        <x>490</x>
-        <y>370</y>
+        <x>460</x>
+        <y>360</y>
         <width>321</width>
         <height>251</height>
        </rect>
@@ -215,7 +222,7 @@
         <rect>
          <x>40</x>
          <y>20</y>
-         <width>191</width>
+         <width>231</width>
          <height>51</height>
         </rect>
        </property>
@@ -226,7 +233,7 @@
       <widget class="QLabel" name="redLabel">
        <property name="geometry">
         <rect>
-         <x>30</x>
+         <x>40</x>
          <y>100</y>
          <width>51</width>
          <height>41</height>
@@ -289,6 +296,22 @@
        </property>
       </widget>
      </widget>
+     <widget class="QFrame" name="frame_4">
+      <property name="geometry">
+       <rect>
+        <x>850</x>
+        <y>50</y>
+        <width>531</width>
+        <height>561</height>
+       </rect>
+      </property>
+      <property name="frameShape">
+       <enum>QFrame::StyledPanel</enum>
+      </property>
+      <property name="frameShadow">
+       <enum>QFrame::Raised</enum>
+      </property>
+     </widget>
     </widget>
     <widget class="QWidget" name="selectionTab">
      <attribute name="title">
@@ -297,8 +320,8 @@
      <widget class="QPushButton" name="addBtn">
       <property name="geometry">
        <rect>
-        <x>190</x>
-        <y>590</y>
+        <x>460</x>
+        <y>580</y>
         <width>121</width>
         <height>41</height>
        </rect>
@@ -310,8 +333,8 @@
      <widget class="QPushButton" name="deleteBtn">
       <property name="geometry">
        <rect>
-        <x>30</x>
-        <y>590</y>
+        <x>280</x>
+        <y>580</y>
         <width>121</width>
         <height>41</height>
        </rect>
@@ -323,8 +346,8 @@
      <widget class="QPushButton" name="applyBtn">
       <property name="geometry">
        <rect>
-        <x>730</x>
-        <y>590</y>
+        <x>990</x>
+        <y>580</y>
         <width>121</width>
         <height>41</height>
        </rect>
@@ -336,8 +359,8 @@
      <widget class="QTableWidget" name="tableWidget">
       <property name="geometry">
        <rect>
-        <x>30</x>
-        <y>50</y>
+        <x>280</x>
+        <y>40</y>
         <width>821</width>
         <height>501</height>
        </rect>
@@ -348,14 +371,14 @@
    <widget class="QPushButton" name="endBtn">
     <property name="geometry">
      <rect>
-      <x>880</x>
-      <y>20</y>
-      <width>89</width>
+      <x>1370</x>
+      <y>40</y>
+      <width>101</width>
       <height>25</height>
      </rect>
     </property>
     <property name="text">
-     <string>종료</string>
+     <string>Stop Machine</string>
     </property>
    </widget>
   </widget>
@@ -364,7 +387,7 @@
     <rect>
      <x>0</x>
      <y>0</y>
-     <width>1057</width>
+     <width>1533</width>
      <height>22</height>
     </rect>
    </property>
