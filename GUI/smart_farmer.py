@@ -12,6 +12,12 @@ import time
 import serial
 import struct
 
+#================================================
+import datetime
+import cv2
+
+#================================================
+
 from_class = uic.loadUiType("smart_farmer.ui")[0]
 
 class Receiver(QThread):
@@ -93,6 +99,28 @@ class WindowClass(QMainWindow, from_class) :
         self.receiver.start()
 
         self.endBtn.hide()
+
+        #====================================================================
+        self.setFixedSize(1533, 874)   #fix size
+        self.setWindowIcon(QIcon("smartfarm_Freeplk.png"))
+
+        self.pixmap = QPixmap()
+        self.camera = Camera()
+        self.autoCap = QTimer(self)
+
+        #self.PBT_cap.hide()
+        #self.autoCap.start(24 * 60 * 60 * 1000)
+
+        #self.PBT_cap.clicked.connect(self.capture)
+
+        self.autoCap.timeout.connect(self.autoTimer)
+        self.camera.updateSignal.connect(self.cameraUpdate)
+
+        self.camera.running = True
+        self.camera.start()
+        self.video = cv2.VideoCapture(-1)
+
+        #====================================================================
 
         #---------------------------------------------------------------------
         # Set Default Columns 
@@ -300,6 +328,49 @@ class WindowClass(QMainWindow, from_class) :
         print(recv)
 
         return
+    
+#===================================================================
+
+    def cameraUpdate(self):
+        retval, image = self.video.read()
+        if retval:
+            self.image = cv2.cvtColor(image, cv2.COLOR_RGB2BGR)
+
+            h, w, c = self.image.shape
+            qimage = QImage(self.image.data, w, h, w*c, QImage.Format_RGB888)
+
+            self.pixmap = self.pixmap.fromImage(qimage)
+            self.pixmap = self.pixmap.scaled(self.LB_camera.width(), self.LB_camera.height())
+
+            self.LB_camera.setPixmap(self.pixmap)
+
+    def capture(self):
+        self.now = datetime.datetime.now().strftime('%Y%m%d_%H%M%S')
+        filename = self.now + '.png'
+
+        cv2.imwrite(filename, cv2.cvtColor(self.image, cv2.COLOR_RGB2BGR))
+
+    def autoTimer(self):
+        self.capture()
+
+class Camera(QThread):
+    updateSignal = pyqtSignal()
+
+    def __init__(self, sec = 0, parent = None):
+        super().__init__()
+        self.main = parent
+        self.running = True
+
+    def run(self):
+        count = 0
+        while self.running == True:
+            self.updateSignal.emit()
+            time.sleep(0.1)
+
+    def stop(self):
+        self.running = False
+
+#===================================================================
   
 if __name__ == "__main__":
     app = QApplication(sys.argv)

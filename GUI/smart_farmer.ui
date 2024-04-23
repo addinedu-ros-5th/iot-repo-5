@@ -296,7 +296,7 @@ border-radius: 10px;</string>
        </property>
       </widget>
      </widget>
-     <widget class="QFrame" name="frame_4">
+     <widget class="QLabel" name="LB_camera">
       <property name="geometry">
        <rect>
         <x>850</x>
@@ -308,8 +308,8 @@ border-radius: 10px;</string>
       <property name="frameShape">
        <enum>QFrame::StyledPanel</enum>
       </property>
-      <property name="frameShadow">
-       <enum>QFrame::Raised</enum>
+      <property name="text">
+       <string/>
       </property>
      </widget>
     </widget>
