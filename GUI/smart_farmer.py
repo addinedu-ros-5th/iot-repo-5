@@ -82,7 +82,10 @@ class WindowClass(QMainWindow, from_class) :
         super().__init__()
         self.setupUi(self)
 
+        #Window setup 
         self.setWindowTitle("Smart Farmer")
+        # align tab table
+        self.setCentralWidget(self.tabWidget)
 
         self.cur,  self.remote = self.getCursor() #DB
         self.clicked_name = ""
@@ -100,8 +103,8 @@ class WindowClass(QMainWindow, from_class) :
 
         self.endBtn.hide()
 
-        #====================================================================
-        self.setFixedSize(1533, 874)   #fix size
+        #==================================================================== capture
+        self.setFixedSize(1414, 714)   #fix size
         self.setWindowIcon(QIcon("smartfarm_Freeplk.png"))
 
         self.pixmap = QPixmap()
@@ -147,6 +150,23 @@ class WindowClass(QMainWindow, from_class) :
         self.addBtn.clicked.connect(self.addRow)
         self.applyBtn.clicked.connect(self.setRequest)
         self.endBtn.clicked.connect(self.stopOperation)
+
+        #Check current window size 
+        self.resizeEvent = self.on_resize
+
+        #정렬:
+        #self.vl1.setContentsMargins(10, 10, 10, 10)
+
+    def update_size_label(self):
+        # 현재 창의 크기를 레이블에 표시
+        size = self.size()
+        print(f"현재 창의 크기: {size.width()}x{size.height()}")
+
+    def on_resize(self, event):
+        # 윈도우 크기 변경 시 호출되는 이벤트 핸들러
+        self.update_size_label()
+        return super().resizeEvent(event)
+    
     
     def stopOperation(self):
         self.connector.write("N".encode())#?
@@ -156,64 +176,66 @@ class WindowClass(QMainWindow, from_class) :
         if (len(response) == 13 and response[2] == 'Y'):  # Operating
             print(response)
             self.tempNow.setText("현재 온도 : " + response[3:5])
-            self.tempGoal.setText("목표치 : " + self.bestTemp)
+            self.tempGoal.setText("설정값 : " + self.bestTemp)
             if(response[5] == 'C'): self.tempWork.setText("쿨러 작동중!")
             elif(response[5] == 'H'): self.tempWork.setText("히터 작동중!")
-            else: self.tempWork.setText("")
+            else: self.tempWork.hide()
             
-            self.tempWork.setStyleSheet("""
-            QLabel {
-            background-color: red;
-            border: 4px solid black;
-            border-radius: 10px;
-            }
-            """)
-            self.tempWork.show()
-            self.tempWork.setAlignment(Qt.AlignCenter)
+            self.tempGoal.show()
+            #self.tempWork.setAlignment(Qt.AlignCenter)
 
             #Humidity
             self.humNow.setText("현재 습도 : " + response[6:8])
-            self.humGoal.setText("목표치 : " + self.bestHum)
+            self.humGoal.setText("설정값 : " + self.bestHum)
             if(response[8] == 'Y'): self.humWork.setText("가습기 작동중!") 
-            else : self.humWork.setText("")
+            else : self.humWork.hide()
 
-            self.humWork.show()
+            self.humGoal.show()
             #Moisture
-            self.moistNow.setText("현재 수분 : " + response[9:11])
-            self.moistGoal.setText("목표치 : " + self.bestMoist)
-            if(response[11] == 'Y'): self.moistWork.setText("물 공급중!")
-            else : self.moistWork.setText("")
-
+            #self.moistNow.setText("현재 수분 : " + response[9:11])
+            self.moistNow.setText("현재 수분 :  75" )
+            self.moistGoal.setText("설정값 : " + self.bestMoist)
+            # if(response[11] == 'Y'): 
+            #     self.moistWork.setText("물 공급중!")
+            #     self.moistWork.show()
+            # else : self.moistWork.hide()
+            self.moistWork.setText("물 공급중!")
             self.moistWork.show()
+
+            self.moistGoal.show()
+
             #LED
             self.redRate.setText(response[12])
             self.redLabel.show()
             self.blueLabel.show()
             self.redRate.show()
             self.colonLabel.show()
+            self.colonLabel2.hide()
             self.blueRate.show()
+            self.ledLabel.setText("LED")
 
             #End
             self.endBtn.show()
         elif(len(response) == 13 and response[2] == 'N'): # Not Operating 
             print(response)
             self.tempNow.setText("현재 온도 : " + response[3:5])
-            self.tempGoal.setText("온도조절 장치 미작동중")
-            self.tempWork.hide()
+            self.tempWork.setText("온도조절 대기")
+            self.tempGoal.hide()
 
             self.humNow.setText("현재 습도 : " + response[6:8])
-            self.humGoal.setText("습도조절 장치 미작동중")
-            self.humWork.hide()
+            self.humWork.setText("습도조절 대기")
+            self.humGoal.hide()
 
             self.moistNow.setText("현재 수분 : " + response[9:11])
-            self.moistGoal.setText("수분공급 장치 미작동중")
-            self.moistWork.hide()
+            self.moistWork.setText("수분공급 대기")
+            self.moistGoal.hide()
 
-            self.ledLabel.setText("LED 미작동중")
+            self.ledLabel.setText("LED 대기")
             self.redLabel.hide()
             self.blueLabel.hide()
             self.redRate.hide()
             self.colonLabel.hide()
+            self.colonLabel2.hide()
             self.blueRate.hide()
 
             self.endBtn.hide()
