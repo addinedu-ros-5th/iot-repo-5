@@ -9,10 +9,14 @@ const int HUMIDIFIER_PIN =4;
 const int PUMP_PIN = 7;
 const int FAN_PINA = 2;
 const int FAN_PINB = 3; 
+const int BLUE_LED_PIN = 9;
+const int RED_LED_PIN = 10;
+const bool LED_ON = HIGH;
+const bool LED_OFF = LOW;
 const int TEMPERATURE_ERROR = 5;
 const int HUMIDITY_ERROR = 5;
 const int WATER_ERROR = 5;
-const int MAX_LED = 10;
+const int MAX_LED = 8;
 const int SEND_STATUS_DELAY = 1000;
 
 bool farm_on = false;
@@ -122,12 +126,28 @@ int Control(int current, int target, int error, int *flag)
 
 void setup() {
     Serial.begin(9600);
+
     pinMode(FELTIER_PINA, OUTPUT);
     pinMode(FELTIER_PINB, OUTPUT);;
+    digitalWrite(FELTIER_PINA, LOW);
+    digitalWrite(FELTIER_PINB, LOW);
+
     pinMode(HUMIDIFIER_PIN, OUTPUT);
+    digitalWrite(HUMIDIFIER_PIN, LOW);
+
     pinMode(PUMP_PIN, OUTPUT);
+    digitalWrite(PUMP_PIN, LOW);
+
     pinMode(FAN_PINA, OUTPUT);
     pinMode(FAN_PINB, OUTPUT);
+    digitalWrite(FAN_PINA, LOW);
+    digitalWrite(FAN_PINB, LOW);
+
+    pinMode(BLUE_LED_PIN, OUTPUT);
+    pinMode(RED_LED_PIN, OUTPUT);
+    digitalWrite(BLUE_LED_PIN, LED_OFF);
+    digitalWrite(RED_LED_PIN, LED_OFF);
+
     farm_on = false;
     led_on = true;
 }
@@ -161,6 +181,10 @@ void loop() {
       {
         led_on = true;
         target_LED = recv_data[7]-'0';
+        if (target_LED > MAX_LED)
+        {
+          target_LED = MAX_LED;
+        }
       }
       Serial.println('S');
     }
@@ -222,6 +246,17 @@ void loop() {
     {
       digitalWrite(PUMP_PIN, LOW);
     }
+
+    if (led_on == true)
+    {
+      analogWrite(RED_LED_PIN, led);
+      digitalWrite(BLUE_LED_PIN, LED_ON);
+    }
+    else
+    {
+      digitalWrite(RED_LED_PIN, LED_OFF);
+      digitalWrite(BLUE_LED_PIN, LED_OFF);
+    }
   }
   else
   {
@@ -237,6 +272,11 @@ void loop() {
 
     digitalWrite(PUMP_PIN, LOW);
     water_flag = 0;
+
+    digitalWrite(RED_LED_PIN, LED_OFF);
+    digitalWrite(BLUE_LED_PIN, LED_OFF);
+
+    led_on = false;
   }
 
 
