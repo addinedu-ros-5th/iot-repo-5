@@ -15,6 +15,7 @@ import struct
 #================================================
 import datetime
 import cv2
+import os
 
 #================================================
 
@@ -108,10 +109,11 @@ class WindowClass(QMainWindow, from_class) :
         self.camera = Camera()
         self.autoCap = QTimer(self)
 
-        #self.PBT_cap.hide()
         #self.autoCap.start(24 * 60 * 60 * 1000)
+        #self.autoCap.start(1 * 60 * 1000)   #test 1minute
 
-        #self.PBT_cap.clicked.connect(self.capture)
+        self.PBT_clear.clicked.connect(self.dailyClear)
+        self.PBT_daily.clicked.connect(self.dailySave)
 
         self.autoCap.timeout.connect(self.autoTimer)
         self.camera.updateSignal.connect(self.cameraUpdate)
@@ -332,9 +334,9 @@ class WindowClass(QMainWindow, from_class) :
 #===================================================================
 
     def cameraUpdate(self):
-        retval, image = self.video.read()
+        retval, self.image = self.video.read()
         if retval:
-            self.image = cv2.cvtColor(image, cv2.COLOR_RGB2BGR)
+            self.image = cv2.cvtColor(self.image, cv2.COLOR_RGB2BGR)
 
             h, w, c = self.image.shape
             qimage = QImage(self.image.data, w, h, w*c, QImage.Format_RGB888)
@@ -345,13 +347,62 @@ class WindowClass(QMainWindow, from_class) :
             self.LB_camera.setPixmap(self.pixmap)
 
     def capture(self):
+        directory = "captures"
+        if not os.path.exists(directory):
+            os.makedirs(directory)
+
         self.now = datetime.datetime.now().strftime('%Y%m%d_%H%M%S')
-        filename = self.now + '.png'
+        #filename = self.now + '.png'
+        filename = os.path.join(directory, self.now + '.png')
 
         cv2.imwrite(filename, cv2.cvtColor(self.image, cv2.COLOR_RGB2BGR))
 
     def autoTimer(self):
         self.capture()
+
+    def dailyClear(self):
+        reply = QMessageBox.question(self, 'clear', 'Do you really erase all?', QMessageBox.Yes | QMessageBox.No,
+                                     QMessageBox.No)
+        if reply == QMessageBox.Yes:
+            self.TE_daily.clear()
+        else:
+            return
+        
+    def dailySave(self):
+        reply = QMessageBox.question(self, 'save', 'Do you save? If you do, all text will erase.',
+                                     QMessageBox.Yes | QMessageBox.No, QMessageBox.No)
+        if reply == QMessageBox.Yes:
+            daily = self.TE_daily.toPlainText()
+
+            folderName = datetime.datetime.now().strftime('%Y%m%d')
+            nowH = datetime.datetime.now().strftime('%Y%m%d_%H%M')
+            folderPath = QFileDialog.getExistingDirectory(None, "Please select path to create folder")
+
+            if folderPath == "":
+                return
+
+            directory = os.path.join(folderPath, folderName)
+            if not os.path.exists(directory):
+                os.makedirs(directory)
+            
+
+            if daily:
+                fileName = nowH + '.txt'
+                filePath = os.path.join(directory, fileName)
+
+                with open(filePath, 'w') as f:
+                    f.write(daily)
+                    self.TE_daily.clear()
+                    
+                    self.now = datetime.datetime.now().strftime('%Y%m%d_%H%M')
+                    filePngName = self.now + '.png'
+                    filePngPath = os.path.join(directory, filePngName)
+                    
+
+                    cv2.imwrite(filePngPath, cv2.cvtColor(self.image, cv2.COLOR_RGB2BGR))
+        else:
+            return
+
 
 class Camera(QThread):
     updateSignal = pyqtSignal()
@@ -362,7 +413,6 @@ class Camera(QThread):
         self.running = True
 
     def run(self):
-        count = 0
         while self.running == True:
             self.updateSignal.emit()
             time.sleep(0.1)
