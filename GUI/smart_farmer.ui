@@ -374,9 +374,9 @@ border-radius: 10px;</string>
      <widget class="QTextEdit" name="TE_daily">
       <property name="geometry">
        <rect>
-        <x>30</x>
+        <x>650</x>
         <y>20</y>
-        <width>1231</width>
+        <width>600</width>
         <height>601</height>
        </rect>
       </property>
@@ -405,6 +405,35 @@ border-radius: 10px;</string>
       </property>
       <property name="text">
        <string>초기화</string>
+      </property>
+     </widget>
+     <widget class="QPushButton" name="PBT_open">
+      <property name="geometry">
+       <rect>
+        <x>1270</x>
+        <y>80</y>
+        <width>121</width>
+        <height>51</height>
+       </rect>
+      </property>
+      <property name="text">
+       <string>열기</string>
+      </property>
+     </widget>
+     <widget class="QLabel" name="LB_dailyCam">
+      <property name="geometry">
+       <rect>
+        <x>30</x>
+        <y>20</y>
+        <width>600</width>
+        <height>601</height>
+       </rect>
+      </property>
+      <property name="frameShape">
+       <enum>QFrame::StyledPanel</enum>
+      </property>
+      <property name="text">
+       <string/>
       </property>
      </widget>
     </widget>
