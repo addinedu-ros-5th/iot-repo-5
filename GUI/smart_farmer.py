@@ -15,6 +15,7 @@ import struct
 #================================================
 import datetime
 import cv2
+import os
 
 #================================================
 
@@ -113,18 +114,23 @@ class WindowClass(QMainWindow, from_class) :
         self.camera = Camera()
         self.autoCap = QTimer(self)
 
-        #self.PBT_cap.hide()
         #self.autoCap.start(24 * 60 * 60 * 1000)
+        #self.autoCap.start(1 * 60 * 1000)   #test 1minute
 
-        #self.PBT_cap.clicked.connect(self.capture)
+        self.PBT_clear.clicked.connect(self.dailyClear)
+        self.PBT_daily.clicked.connect(self.dailySave)
+        self.PBT_open.clicked.connect(self.fileOpen)
 
         self.autoCap.timeout.connect(self.autoTimer)
         self.camera.updateSignal.connect(self.cameraUpdate)
 
         self.camera.running = True
         self.camera.start()
-        self.video = cv2.VideoCapture(2)
 
+        self.video = cv2.VideoCapture(-1)
+        self.picFlag = False
+        self.openFlag = False
+        self.openPath = ""
         #====================================================================
 
         #---------------------------------------------------------------------
@@ -420,26 +426,157 @@ class WindowClass(QMainWindow, from_class) :
 #===================================================================
 
     def cameraUpdate(self):
-        retval, image = self.video.read()
+        retval, self.image = self.video.read()
         if retval:
-            self.image = cv2.cvtColor(image, cv2.COLOR_RGB2BGR)
+            self.image = cv2.cvtColor(self.image, cv2.COLOR_RGB2BGR)
 
             h, w, c = self.image.shape
             qimage = QImage(self.image.data, w, h, w*c, QImage.Format_RGB888)
 
             self.pixmap = self.pixmap.fromImage(qimage)
-            self.pixmap = self.pixmap.scaled(self.LB_camera.width(), self.LB_camera.height())
+            self.pixmapMo = self.pixmap.scaled(self.LB_camera.width(), self.LB_camera.height())
+            self.pixmapCam = self.pixmap.scaled(self.LB_dailyCam.width(), self.LB_dailyCam.height())
 
-            self.LB_camera.setPixmap(self.pixmap)
+            self.LB_camera.setPixmap(self.pixmapMo)
+            if self.picFlag == False:
+                self.LB_dailyCam.setPixmap(self.pixmapCam)
+            
 
     def capture(self):
+        directory = "captures"
+        if not os.path.exists(directory):
+            os.makedirs(directory)
+
         self.now = datetime.datetime.now().strftime('%Y%m%d_%H%M%S')
-        filename = self.now + '.png'
+        #filename = self.now + '.png'
+        filename = os.path.join(directory, self.now + '.png')
 
         cv2.imwrite(filename, cv2.cvtColor(self.image, cv2.COLOR_RGB2BGR))
 
     def autoTimer(self):
         self.capture()
+
+    def dailyClear(self):
+        reply = QMessageBox.question(self, 'clear', 'Do you really erase all?', QMessageBox.Yes | QMessageBox.No,
+                                     QMessageBox.No)
+        if reply == QMessageBox.Yes:
+            self.TE_daily.clear()
+            self.picFlag = False
+            self.openPath = ""
+            self.openFlag = False
+        else:
+            return
+        
+    def dailySave(self):
+        daily = self.TE_daily.toPlainText()
+
+        if self.openFlag == True:   #if save an openfile
+            folderPath = self.openPath
+
+            if daily:
+                with open(folderPath, 'w') as f:
+                    f.write(daily)
+                    self.TE_daily.clear()
+                    self.openPath = ""
+                    self.openFlag = False
+                    self.picFlag = False
+                    QMessageBox.information(self, 'save', 'modification completed')
+
+        else:   #self.openFlag == false   if save new file
+
+            folderName = datetime.datetime.now().strftime('%Y%m%d')
+            nowH = datetime.datetime.now().strftime('%Y%m%d_%H%M')
+            folderPath = QFileDialog.getExistingDirectory(None, "Please select path to create folder")
+
+            if folderPath == "":
+                return
+
+            directory = os.path.join(folderPath, folderName)
+            if not os.path.exists(directory):
+                os.makedirs(directory)
+            
+
+            if daily:
+                fileName = nowH + '.txt'
+                filePath = os.path.join(directory, fileName)
+
+                with open(filePath, 'w') as f:
+                    f.write(daily)
+                    self.TE_daily.clear()
+                    
+                    self.now = datetime.datetime.now().strftime('%Y%m%d_%H%M')
+                    filePngName = self.now + '.png'
+                    filePngPath = os.path.join(directory, filePngName)
+                    
+
+                    cv2.imwrite(filePngPath, cv2.cvtColor(self.image, cv2.COLOR_RGB2BGR))
+                    QMessageBox.information(self, 'save', 'save completed')
+
+        
+    def fileOpen(self):
+        if self.TE_daily.toPlainText():
+            reply =  QMessageBox.question(self, 'open', 'Do you open existed file?\nif you do, all text will erase.\nSave the file before open it.',
+                                          QMessageBox.Yes | QMessageBox.No, QMessageBox.No)
+            if reply == QMessageBox.Yes:
+                fileName, _ = QFileDialog.getOpenFileName(self, 'Open File', '-', 'Text Files(*.txt)')
+                if fileName:
+                    try:
+                        with open(fileName, 'r') as f:
+                            text = f.read()
+                            self.TE_daily.setText(text)
+                            self.openPath = fileName
+                            self.openFlag = True
+                            
+                            pngName = os.path.splitext(fileName)[0] + '.png'
+                            if os.path.exists(pngName):
+                                self.picFlag = True
+
+                                self.showImage(pngName)
+                            else:
+                                QMessageBox.warning(self, 'open', 'can not find the image file.')
+                    except:
+                        return
+            else:
+                return
+        else:
+            fileName, _ = QFileDialog.getOpenFileName(self, 'Open File', '-', 'Text Files(*.txt)')
+            if fileName:
+                try:
+                    with open(fileName, 'r') as f:
+                        text = f.read()
+                        self.TE_daily.setText(text)
+                        self.openPath = fileName
+                        self.openFlag = True
+                        
+                        pngName = os.path.splitext(fileName)[0] + '.png'
+                        if os.path.exists(pngName):
+                            self.picFlag = True
+
+                            self.showImage(pngName)
+                        else:
+                            QMessageBox.warning(self, 'open', 'can not find the image file.')
+                            
+                            
+
+                except:
+                    return
+                
+    
+        
+    def showImage(self, imagePath):
+        image = cv2.imread(imagePath)
+        image = cv2.cvtColor(image, cv2.COLOR_RGB2BGR)
+
+        h, w, c = image.shape
+        qImage = QImage(image.data, w, h, w * c, QImage.Format_RGB888)
+
+        self.pixmap = self.pixmap.fromImage(qImage)
+        self.pixmap = self.pixmap.scaled(self.LB_dailyCam.width(), self.LB_dailyCam.height())
+
+        self.LB_dailyCam.setPixmap(self.pixmap)
+        
+    
+
 
 class Camera(QThread):
     updateSignal = pyqtSignal()
@@ -450,7 +587,6 @@ class Camera(QThread):
         self.running = True
 
     def run(self):
-        count = 0
         while self.running == True:
             self.updateSignal.emit()
             time.sleep(0.1)
