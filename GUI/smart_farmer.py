@@ -20,6 +20,8 @@ import cv2
 
 from_class = uic.loadUiType("smart_farmer.ui")[0]
 
+cntTime = 0
+
 class Receiver(QThread):
     detected = pyqtSignal(str)
 
@@ -104,7 +106,7 @@ class WindowClass(QMainWindow, from_class) :
         self.endBtn.hide()
 
         #==================================================================== capture
-        self.setFixedSize(1414, 714)   #fix size
+        self.setFixedSize(1414, 814)   #fix size
         self.setWindowIcon(QIcon("smartfarm_Freeplk.png"))
 
         self.pixmap = QPixmap()
@@ -121,7 +123,7 @@ class WindowClass(QMainWindow, from_class) :
 
         self.camera.running = True
         self.camera.start()
-        self.video = cv2.VideoCapture(-1)
+        self.video = cv2.VideoCapture(2)
 
         #====================================================================
 
@@ -146,7 +148,7 @@ class WindowClass(QMainWindow, from_class) :
         #-------------------------------------------------------------------------------------------- 
         # User Event
         self.tableWidget.cellClicked.connect(self.cellClicked)
-        self.deleteBtn.clicked.connect(self.deletRow)
+        self.deleteBtn.clicked.connect(self.deletRow) 
         self.addBtn.clicked.connect(self.addRow)
         self.applyBtn.clicked.connect(self.setRequest)
         self.endBtn.clicked.connect(self.stopOperation)
@@ -156,6 +158,58 @@ class WindowClass(QMainWindow, from_class) :
 
         #정렬:
         #self.vl1.setContentsMargins(10, 10, 10, 10)
+    
+    def progress (self, val, order):
+        # HTML TEXT PERCENTAGE
+       
+
+        if (order == 1):
+            htmlText = """<p><span style=" font-size:68pt;">{VALUE}</span><span style=" font-size:58pt; vertical-align:super;">°C</span></p>"""
+            newHtml = htmlText.replace("{VALUE}", str(val))
+            self.labelPercentage.setText(newHtml)
+        elif (order == 2):
+            htmlText = """<p><span style=" font-size:68pt;">{VALUE}</span><span style=" font-size:58pt; vertical-align:super;">%</span></p>"""
+            newHtml = htmlText.replace("{VALUE}", str(val))
+            self.labelPercentage2.setText(newHtml)
+        elif (order == 3):
+            htmlText = """<p><span style=" font-size:68pt;">{VALUE}</span><span style=" font-size:58pt; vertical-align:super;">%</span></p>"""
+            newHtml = htmlText.replace("{VALUE}", str(val))
+            self.labelPercentage3.setText(newHtml)
+        
+        self.progressBarValue(val, order)
+
+
+    ## DEF PROGRESS BAR VALUE
+    ########################################################################
+    def progressBarValue(self, value, order):
+
+        # PROGRESSBAR STYLESHEET BASE
+        styleSheet = """
+        QFrame{
+        	border-radius: 150px;
+        	background-color: qconicalgradient(cx:0.5, cy:0.5, angle:90, stop:{STOP_1} rgba(255, 0, 127, 0), stop:{STOP_2} rgba(85, 170, 255, 255));
+        }
+        """
+
+        # GET PROGRESS BAR VALUE, CONVERT TO FLOAT AND INVERT VALUES
+        # stop works of 0.600 to 0.000
+        progress = (60 - value) / 60.0 # 6을 최대값으로 변경
+
+        # GET NEW VALUES
+        stop_1 = str(progress - 0.001)
+        stop_2 = str(progress)
+
+        # SET VALUES TO NEW STYLESHEET
+        newStylesheet = styleSheet.replace("{STOP_1}", stop_1).replace("{STOP_2}", stop_2)
+
+        # APPLY STYLESHEET WITH NEW VALUES
+        if (order == 1):
+            self.circularProgress.setStyleSheet(newStylesheet)
+        elif (order == 2):
+            self.circularProgress2.setStyleSheet(newStylesheet)
+        elif (order == 3):
+            self.circularProgress3.setStyleSheet(newStylesheet)
+        
 
     def update_size_label(self):
         # 현재 창의 크기를 레이블에 표시
@@ -175,34 +229,43 @@ class WindowClass(QMainWindow, from_class) :
         # *** For some reason Some of the first responses were like S1 (line changed) N00F00N90NO. Thus, index out of range error
         if (len(response) == 13 and response[2] == 'Y'):  # Operating
             print(response)
-            self.tempNow.setText("현재 온도 : " + response[3:5])
-            self.tempGoal.setText("설정값 : " + self.bestTemp)
-            if(response[5] == 'C'): self.tempWork.setText("쿨러 작동중!")
-            elif(response[5] == 'H'): self.tempWork.setText("히터 작동중!")
+            # self.tempNow.setText("현재 온도 : " + response[3:5])
+            self.tempGoal.setText("Target : " + self.bestTemp)
+            self.progress(int(response[3:5]),1)
+            if(response[5] == 'C'): 
+                self.tempWork.setText("쿨러 작동중!")
+                self.tempWork.show()
+            elif(response[5] == 'H'): 
+                self.tempWork.setText("히터 작동중!")
+                self.tempWork.show()
             else: self.tempWork.hide()
             
-            self.tempGoal.show()
+            
             #self.tempWork.setAlignment(Qt.AlignCenter)
 
             #Humidity
-            self.humNow.setText("현재 습도 : " + response[6:8])
-            self.humGoal.setText("설정값 : " + self.bestHum)
-            if(response[8] == 'Y'): self.humWork.setText("가습기 작동중!") 
+            #self.humNow.setText("현재 습도 : " + response[6:8])
+            self.progress(int(response[6:8]),2)
+            self.humGoal.setText("Target : " + self.bestHum)
+            if(response[8] == 'Y'): 
+                self.humWork.setText("가습기 작동중!") 
+                self.humWork.show()
             else : self.humWork.hide()
 
-            self.humGoal.show()
+            
             #Moisture
             #self.moistNow.setText("현재 수분 : " + response[9:11])
-            self.moistNow.setText("현재 수분 :  75" )
-            self.moistGoal.setText("설정값 : " + self.bestMoist)
-            # if(response[11] == 'Y'): 
-            #     self.moistWork.setText("물 공급중!")
-            #     self.moistWork.show()
-            # else : self.moistWork.hide()
-            self.moistWork.setText("물 공급중!")
-            self.moistWork.show()
+            #self.moistNow.setText("현재 수분 :  75" )
+            self.progress(int(response[9:11]),3)
+            self.moistGoal.setText("Target : " + self.bestMoist)
+            if(response[11] == 'Y'): 
+                self.moistWork.setText("물 공급중!")
+                self.moistWork.show()
+            else : self.moistWork.hide()
+            # self.moistWork.setText("물 공급중!")
+            # self.moistWork.show()
 
-            self.moistGoal.show()
+            #self.moistGoal.show()
 
             #LED
             self.redRate.setText(response[12])
@@ -218,19 +281,22 @@ class WindowClass(QMainWindow, from_class) :
             self.endBtn.show()
         elif(len(response) == 13 and response[2] == 'N'): # Not Operating 
             print(response)
-            self.tempNow.setText("현재 온도 : " + response[3:5])
-            self.tempWork.setText("온도조절 대기")
-            self.tempGoal.hide()
+            #self.tempNow.setText("현재 온도 : " + response[3:5])
+            self.progress(int(response[3:5]),1)
+            self.tempWork.hide()
+            self.tempGoal.setText("standby mode")
 
-            self.humNow.setText("현재 습도 : " + response[6:8])
-            self.humWork.setText("습도조절 대기")
-            self.humGoal.hide()
+            #self.humNow.setText("현재 습도 : " + response[6:8])
+            self.progress(int(response[6:8]),2)
+            self.humWork.hide()
+            self.humGoal.setText("standby mode")
 
-            self.moistNow.setText("현재 수분 : " + response[9:11])
-            self.moistWork.setText("수분공급 대기")
-            self.moistGoal.hide()
+            #self.moistNow.setText("현재 수분 : " + response[9:11])
+            self.progress(int(response[9:11]),3)
+            self.moistWork.hide()
+            self.moistGoal.setText("standby mode")
 
-            self.ledLabel.setText("LED 대기")
+            self.ledLabel.setText("LED standby mode")
             self.redLabel.hide()
             self.blueLabel.hide()
             self.redRate.hide()
@@ -254,7 +320,7 @@ class WindowClass(QMainWindow, from_class) :
 
         self.bestTemp = selected_items[1].text()
         self.bestHum = selected_items[2].text()
-        self.bestMoist = selected_items[1].text()
+        self.bestMoist = selected_items[5].text()
 
 
     def addRow(self):
