@@ -7,7 +7,7 @@
     <x>0</x>
     <y>0</y>
     <width>1533</width>
-    <height>874</height>
+    <height>829</height>
    </rect>
   </property>
   <property name="windowTitle">
@@ -364,6 +364,76 @@ border-radius: 10px;</string>
         <width>821</width>
         <height>501</height>
        </rect>
+      </property>
+     </widget>
+    </widget>
+    <widget class="QWidget" name="tab_daily">
+     <attribute name="title">
+      <string>일기</string>
+     </attribute>
+     <widget class="QTextEdit" name="TE_daily">
+      <property name="geometry">
+       <rect>
+        <x>650</x>
+        <y>20</y>
+        <width>600</width>
+        <height>601</height>
+       </rect>
+      </property>
+     </widget>
+     <widget class="QPushButton" name="PBT_daily">
+      <property name="geometry">
+       <rect>
+        <x>1270</x>
+        <y>20</y>
+        <width>121</width>
+        <height>51</height>
+       </rect>
+      </property>
+      <property name="text">
+       <string>저장</string>
+      </property>
+     </widget>
+     <widget class="QPushButton" name="PBT_clear">
+      <property name="geometry">
+       <rect>
+        <x>1270</x>
+        <y>570</y>
+        <width>121</width>
+        <height>51</height>
+       </rect>
+      </property>
+      <property name="text">
+       <string>초기화</string>
+      </property>
+     </widget>
+     <widget class="QPushButton" name="PBT_open">
+      <property name="geometry">
+       <rect>
+        <x>1270</x>
+        <y>80</y>
+        <width>121</width>
+        <height>51</height>
+       </rect>
+      </property>
+      <property name="text">
+       <string>열기</string>
+      </property>
+     </widget>
+     <widget class="QLabel" name="LB_dailyCam">
+      <property name="geometry">
+       <rect>
+        <x>30</x>
+        <y>20</y>
+        <width>600</width>
+        <height>601</height>
+       </rect>
+      </property>
+      <property name="frameShape">
+       <enum>QFrame::StyledPanel</enum>
+      </property>
+      <property name="text">
+       <string/>
       </property>
      </widget>
     </widget>
