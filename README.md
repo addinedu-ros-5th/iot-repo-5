@@ -11,10 +11,16 @@
 
 ## 03. 팀소개
 ### 팀명 FARM FRIENDS
-|김세현|팀장 / 하드웨어 제작, 통신 프로토콜 제작, MCU 코드 제작 / 발표|
+|이름|역할|
+|:---:|:---:|
+|김세현|팀장, 하드웨어 제작, 통신 프로토콜 작성, MCU 코드 제작, 발표, ReadMe 제작|
 |김준영|GUI제작, PC 제어, 통신코드 제작|
 |이민영|DB 제작, 자료조사, GUI제작, 다이어리 제작코드 제작|
 |조성오|협업툴 구성, 발표자료 제작, 시스템 구성도 제작|
+## 기술스택
+<img src="https://img.shields.io/badge/Python-3776AB?style=for-the-badge&logo=Python&logoColor=white"> <img src="https://img.shields.io/badge/opencv-5C3EE8?style=for-the-badge&logo=opencv&logoColor=white"> <img src="https://img.shields.io/badge/amazonrds-527FFF?style=for-the-badge&logo=amazonrds&logoColor=white"> <img src="https://img.shields.io/badge/mysql-4479A1?style=for-the-badge&logo=mysql&logoColor=white"> <img src="https://img.shields.io/badge/github-181717?style=for-the-badge&logo=github&logoColor=white">
+
+
 ## 04. 시스템 구성
 ### 4-1 기능리스트
 ![image](https://github.com/addinedu-ros-5th/iot-repo-5/assets/55865857/dc6c1ae5-5667-4b34-8b18-163b73b0a2ff)
@@ -39,4 +45,6 @@
 ![image](https://github.com/addinedu-ros-5th/iot-repo-5/assets/55865857/ac071993-3d23-41f3-8028-1dba5cec89ee)
 ### 5-5 일기 작성화면
 ![image](https://github.com/addinedu-ros-5th/iot-repo-5/assets/55865857/1415c382-759b-4403-8469-a25f991ea984)
+## 06. 프로젝트 기간
+2024.4.17(수) ~ 2024.4.25(목)
 
