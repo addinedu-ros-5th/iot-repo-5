@@ -17,34 +17,34 @@
 |김준영|GUI제작, PC 제어, 통신코드 제작|
 |이민영|DB 제작, 자료조사, GUI제작, 다이어리 제작코드 제작|
 |조성오|협업툴 구성, 발표자료 제작, 시스템 구성도 제작|
-## 기술스택
+## 04. 기술스택
 <img src="https://img.shields.io/badge/Python-3776AB?style=for-the-badge&logo=Python&logoColor=white"> <img src="https://img.shields.io/badge/opencv-5C3EE8?style=for-the-badge&logo=opencv&logoColor=white"> <img src="https://img.shields.io/badge/amazonrds-527FFF?style=for-the-badge&logo=amazonrds&logoColor=white"> <img src="https://img.shields.io/badge/mysql-4479A1?style=for-the-badge&logo=mysql&logoColor=white"> <img src="https://img.shields.io/badge/github-181717?style=for-the-badge&logo=github&logoColor=white">
 
 
-## 04. 시스템 구성
-### 4-1 기능리스트
+## 5. 시스템 구성
+### 5-1 기능리스트
 ![image](https://github.com/addinedu-ros-5th/iot-repo-5/assets/55865857/dc6c1ae5-5667-4b34-8b18-163b73b0a2ff)
-### 4-2 시스템 구성도
+### 5-2 시스템 구성도
 ![image](https://github.com/addinedu-ros-5th/iot-repo-5/assets/55865857/2aac719a-8b6f-49eb-8eaf-3a25ed6f8d91)
-### 4-3 하드웨어 구성도
+### 5-3 하드웨어 구성도
 ![image](https://github.com/addinedu-ros-5th/iot-repo-5/assets/55865857/5c75b869-7b65-4b3b-b24e-f14cde7652da)
-### 4-4 소프트웨어 구성도
+### 5-4 소프트웨어 구성도
 ![image](https://github.com/addinedu-ros-5th/iot-repo-5/assets/55865857/bc4be3cf-405b-40ff-8e93-1163b7985167)
-## 05. 제작 결과
-### 5-1 스마트팜 본체
+## 06. 제작 결과
+### 6-1 스마트팜 본체
 ![20240425_101344](https://github.com/addinedu-ros-5th/iot-repo-5/assets/55865857/680a0672-2da0-4c84-9103-9b590693cbe8)
-### 5-2 본체 내부
+### 6-2 본체 내부
 ![20240425_101304](https://github.com/addinedu-ros-5th/iot-repo-5/assets/55865857/0a83edb9-a5f2-4e81-aba8-e3f794ed1e60)
-### 5-3 현재상태 관찰 화면
+### 6-3 현재상태 관찰 화면
 ![image](https://github.com/addinedu-ros-5th/iot-repo-5/assets/55865857/d22ddd94-b268-4e09-9c43-ddcf79d9e7dc)
 아무것도 선택 안된 상태 - 환경제어를 하지 않고 있다.
 ![image](https://github.com/addinedu-ros-5th/iot-repo-5/assets/55865857/20634130-0abc-408b-8734-c6bb98c3bbdc)
 식물을 선택하고 제어하는 상태 - 목표 온도, 습도를 맞추기 위해 내부를 쿨링하고 가습을 하고 있다.
 
-### 5-4 환경설정 선택화면
+### 6-4 환경설정 선택화면
 ![image](https://github.com/addinedu-ros-5th/iot-repo-5/assets/55865857/ac071993-3d23-41f3-8028-1dba5cec89ee)
-### 5-5 일기 작성화면
+### 6-5 일기 작성화면
 ![image](https://github.com/addinedu-ros-5th/iot-repo-5/assets/55865857/1415c382-759b-4403-8469-a25f991ea984)
-## 06. 프로젝트 기간
+## 07. 프로젝트 기간
 2024.4.17(수) ~ 2024.4.25(목)
 
